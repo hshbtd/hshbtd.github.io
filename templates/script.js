@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 필기체 효과 시작 (속도를 느리게 조정)
-        typeWriter(textWrapper, text, 200, () => {
+        typeWriter(textWrapper, text, 150, () => {
             // 타이핑이 완료되면 "다음 이야기" 버튼을 활성화 (마지막 페이지가 아닌 경우)
             if (!pageElement.classList.contains('last-page')) {
                 NEXT_PAGE_BUTTON.disabled = false;
@@ -355,4 +355,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // BGM 볼륨 설정
     BGM.volume = 0.6;
 });
+
 
