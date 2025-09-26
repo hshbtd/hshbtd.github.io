@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>💖 Happy 🐤 Day 💖</title>
+<link rel="stylesheet" href="./templates/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<!-- D-Day 카운트다운 화면 -->
+<div id="countdown-screen" class="screen active">
+<div class="countdown-container">
+<h1 class="countdown-title">💖 Happy 🐤 Day 💖</h1>
+<div id="timer" class="timer">
+<div class="time-unit">
+<span id="days" class="time-value">00</span>
+<span class="time-label">일</span>
+</div>
+<div class="time-unit">
+<span id="hours" class="time-value">00</span>
+<span class="time-label">시간</span>
+</div>
+<div class="time-unit">
+<span id="minutes" class="time-value">00</span>
+<span class="time-label">분</span>
+</div>
+<div class="time-unit">
+<span id="seconds" class="time-value">00</span>
+<span class="time-label">초</span>
+</div>
+</div>
+<div id="password-section">
+<input type="password" id="password-input" placeholder="비밀번호를 입력하세요." maxlength="4">
+<button id="enter-button" class="action-button" disabled>꼬의 생일파티 입장</button>
+</div>
+<div id="loading-message" class="loading-message" style="display: none;">
+음악을 불러오는 중...
+</div>
+<div id="petals-container"></div> <!-- 꽃잎 애니메이션 컨테이너 -->
+<canvas id="fireworks"></canvas> <!-- 폭죽 효과 캔버스 -->
+<p class="small-text">-꼬를 짱짱 사랑하는 도-</p>
+</div>
+</div>
+
+<!-- 메인 생일 축하 페이지 -->
+<div id="main-content-screen" class="screen">
+    <div class="container">
+        <!-- 개별 슬라이드 페이지들 -->
+        <div id="slides-container">
+            <div class="main-page active"
+                 data-text="안녕 꼬야!!<br>우리 꼬꼬의 생일을 도가 짱짱 많이 축하해! 🎉🍰"
+                 data-media-type="image"
+                 data-media-src="./img/KakaoTalk_20250927_020639274.png"> 
+            </div>
+
+            <div class="main-page"
+                 data-text="세상에서 가장 귀엽고 사랑스러운 우리 꼬, 웃는 모습 하나에도 도는 항상 설레."
+                 data-media-type="image"
+                 data-media-src="./img/KakaoTalk_20250927_015454575.jpg">
+            </div>
+
+            <div class="main-page"
+                 data-text="이렇게 귀엽고 삐약삐약하던 우리 꼬꼬가"
+                 data-media-type="image"
+                 data-media-src="./img/KakaoTalk_20250927_020228900.jpg">
+            </div>
+
+            <div class="main-page"
+                 data-text="도랑 3년 만나면서 맛난거 많이 먹고"
+                 data-media-type="image"
+                 data-media-src="./img/KakaoTalk_20250927_015842653.jpg">
+            </div>
+
+            <div class="main-page"
+                 data-text="여행도 많이 다니고"
+                 data-media-type="image"
+                 data-media-src="./img/KakaoTalk_20250927_015619851.jpg">
+            </div>
+            
+             <div class="main-page"
+                 data-text="어느새 회사에 취직도 하더니"
+                 data-media-type="image"
+                 data-media-src="./img/KakaoTalk_20250927_015943299.jpg">
+            </div>
+
+             <div class="main-page"
+                 data-text="무럭무럭 자라서, 멋쟁이 꼬꼬가 되었네!"
+                 data-media-type="image"
+                 data-media-src="./img/KakaoTalk_20250927_015728863.jpg">
+            </div>
+
+             <div class="main-page"
+                 data-text="물놀이하면 뜨거운 햇살에 아야하는 연약한<br>우리 꼬"
+                 data-media-type="image"
+                 data-media-src="./img/KakaoTalk_20250927_015517759.jpg">
+            </div>
+
+            <div class="main-page"
+                 data-text="도가 지켜줄테니까 옆에 딱 붙어있어!@!"
+                 data-media-type="image"
+                 data-media-src="./img/KakaoTalk_20250927_015526128.jpg">
+            </div>
+
+             <div class="main-page"
+                 data-text="올해 생일에는 푸꾸옥 놀러가니까 아쉬워하지말구!!<br>우리 꼬가 좋아하는 바다도 많이 보고<br>맛난 것도 많이 먹자!<br>생일 짱짱 축하해 우리 꼬야 💞"
+                 data-media-type="image"
+                 data-media-src="./img/KakaoTalk_20250927_020504102.jpg">
+            </div>
+
+            <div class="main-page last-page"
+                 
+                 data-media-type="video"
+                 data-media-src="./img/video.mp4">
+            </div>
+        </div>
+
+        <!-- 다음 페이지로 넘어가는 버튼 -->
+        <button id="next-page-button" class="button-52">
+            <img src="https://marketplace.canva.com/TXEyc/MAGuK1TXEyc/1/tl/canva-MAGuK1TXEyc.png" alt="Next" style="max-width: 40%; height: auto;">              
+        </button>
+       
+        <!-- BGM 재생 컨트롤 -->
+        <audio id="bgm" loop>
+            <source src="./audio/bgm.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+     
+    </div>
+</div>
+
+<script src="./templates/script.js"></script>
+</body>
+</html>
