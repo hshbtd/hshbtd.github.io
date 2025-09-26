@@ -27,28 +27,61 @@ document.addEventListener('DOMContentLoaded', () => {
     // ---- Functions ----
 
     // BGM 로딩 상태 확인
-    function checkAudioLoading() {
+    function preloadAllAssets() {
         LOADING_MESSAGE.style.display = 'block';
         
-        BGM.addEventListener('canplaythrough', () => {
-            audioLoaded = true;
-            LOADING_MESSAGE.style.display = 'none';
-            console.log('BGM 로딩 완료');
+        // 1. 모든 이미지/비디오 소스 목록 생성
+        const mediaAssets = mainPages.map(page => ({
+            src: page.getAttribute('data-media-src'),
+            type: page.getAttribute('data-media-type')
+        })).filter(asset => asset.src); // src가 있는 요소만 필터링
+
+        // 2. 각 미디어 파일에 대한 로딩 Promise 생성
+        const promises = mediaAssets.map(asset => {
+            return new Promise((resolve, reject) => {
+                if (asset.type === 'image') {
+                    const img = new Image();
+                    img.onload = () => resolve(asset.src);
+                    img.onerror = () => reject(new Error(`이미지 로딩 실패: ${asset.src}`));
+                    img.src = asset.src;
+                } else if (asset.type === 'video') {
+                    const video = document.createElement('video');
+                    video.addEventListener('canplaythrough', () => resolve(asset.src), { once: true });
+                    video.addEventListener('error', () => reject(new Error(`비디오 로딩 실패: ${asset.src}`)), { once: true });
+                    video.src = asset.src;
+                    video.load();
+                } else {
+                    resolve(); // 미디어 타입이 없는 경우 즉시 해결
+                }
+            });
         });
 
-        BGM.addEventListener('error', (e) => {
-            console.warn('BGM 로딩 실패:', e);
-            audioLoaded = true; // 실패해도 입장 가능하도록
-            LOADING_MESSAGE.style.display = 'none';
-        });
+        // 3. BGM 로딩 Promise 추가
+        promises.push(new Promise((resolve, reject) => {
+            BGM.addEventListener('canplaythrough', resolve, { once: true });
+            BGM.addEventListener('error', (e) => reject(new Error('BGM 로딩 실패')), { once: true });
+            BGM.load();
+        }));
 
-        // BGM 로드 시작
-        BGM.load();
+        // 4. 모든 파일이 로드될 때까지 기다림
+        Promise.allSettled(promises).then((results) => {
+            results.forEach(result => {
+                if (result.status === 'rejected') {
+                    console.warn(result.reason); // 로딩 실패한 파일 로그 출력
+                }
+            });
+            
+            console.log('모든 미디어 에셋 프리로딩 완료.');
+            audioLoaded = true; // 로딩 완료 플래그 설정
+            LOADING_MESSAGE.style.display = 'none'; // "음악을 불러오는 중..." 메시지 숨김
+            checkPassword(); // 비밀번호가 미리 입력되었을 경우를 대비해 버튼 상태 재확인
+        });
     }
 
     // 비밀번호 확인 및 버튼 활성화
     function checkPassword() {
         const password = PASSWORD_INPUT.value;
+        // 모든 에셋 로딩이 완료되고 비밀번호가 일치할 때만 버튼 활성화
         if (password === '1006' && audioLoaded) {
             ENTER_BUTTON.disabled = false;
             ENTER_BUTTON.classList.remove('disabled');
@@ -201,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 필기체 효과 시작 (속도를 느리게 조정)
-        typeWriter(textWrapper, text, 85, () => {
+        typeWriter(textWrapper, text, 100, () => {
             // 타이핑이 완료되면 "다음 이야기" 버튼을 활성화 (마지막 페이지가 아닌 경우)
             if (!pageElement.classList.contains('last-page')) {
                 NEXT_PAGE_BUTTON.disabled = false;
@@ -312,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initial setup
-    checkAudioLoading();
+    preloadAllAssets();
     updateCountdown();
     countdownInterval = setInterval(updateCountdown, 1000);
 
