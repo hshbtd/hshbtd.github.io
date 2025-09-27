@@ -526,39 +526,10 @@ audio {
     transform: translate(-50%, -50%);
     border-radius: 0;
 }
-/* 모바일에서 비디오 비율 최적화 */
-@media (max-width: 768px) {
-    .last-page .page-media video {
-        width: 90%;
-        height: 90%;
-        object-fit: cover;
-        object-position: center center;
-    }
-}
 
-/* 비디오가 세로형일 경우를 위한 추가 스타일 */
-@media (orientation: portrait) {
-    .last-page .page-media video {
-        width: 90vw;
-        height: auto;
-        min-height: 90vh;
-        object-fit: cover;
-        object-position: center center;
-    }
-}
-
-/* 가로형 화면일 경우 */
-@media (orientation: landscape) {
-    .last-page .page-media video {
-        width: auto;
-        height: 100vh;
-        min-width: 100vw;
-        object-fit: cover;
-        object-position: center center;
-    }
-}
 
 .last-page p.page-message {
     display:flex;
     position: absolute;
 }
+
