@@ -5,45 +5,6 @@
 /* Last Page Video Background */
 /* 마지막 페이지 배경 비디오 스타일 수정 */
 /* 마지막 페이지만 완전히 다르게 처리 */
-.last-page {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 9999;
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.last-page .page-media {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    border-radius: 0;
-    overflow: hidden;
-    box-shadow: none;
-}
-
-.last-page .page-media video {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 0;
-}
-
-.last-page p.page-message {
-    display: none;
-}
 
 .button-52 {
     font-size: 16px;
@@ -85,7 +46,7 @@
 
 /* Basic Reset & Body Styling */
 body {
-    font-family: 'Noto Sans KR', 'Nanum Gothic', sans-serif;
+    font-family: 'Noto Color Emoji','Noto Sans KR', 'Nanum Gothic', sans-serif;
     margin: 0;
     display: flex;
     justify-content: center;
@@ -329,9 +290,14 @@ p.page-message {
     overflow-y: auto;
     max-height: 40vh;
     padding-right: 5px;
+    /* 추가: 부드러운 텍스트 렌더링 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    transition: all 0.1s ease-out;
 }
 
-/* 펜 모양 커서 */
+/* 펜 커서 애니메이션도 더 부드럽게 */
 .typed-text.typing-active::after {
     content: '';
     display: inline-block;
@@ -340,13 +306,14 @@ p.page-message {
     margin-left: 5px;
     background: url('https://i.imgur.com/kS5xJ13.png') no-repeat center center;
     background-size: contain;
-    animation: blink-pen 0.8s infinite step-end;
+    animation: blink-pen 1.2s infinite ease-in-out; /* 더 부드러운 깜빡임 */
     vertical-align: middle;
+    transition: opacity 0.3s ease;
 }
 
 @keyframes blink-pen {
-    from, to { opacity: 1; }
-    50% { opacity: 0; }
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.3; } /* 완전히 사라지지 않고 희미해지게 */
 }
 
 p.closing-message {
@@ -521,4 +488,77 @@ audio {
     width: 100%;
     flex-shrink: 0;
     margin-bottom: 20px;
+}
+
+.last-page {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.last-page .page-media {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    overflow: hidden;
+    box-shadow: none;
+}
+
+.last-page .page-media video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 90vw;
+    height: 90vh;
+    object-fit: cover;
+    transform: translate(-50%, -50%);
+    border-radius: 0;
+}
+/* 모바일에서 비디오 비율 최적화 */
+@media (max-width: 768px) {
+    .last-page .page-media video {
+        width: 90%;
+        height: 90%;
+        object-fit: cover;
+        object-position: center center;
+    }
+}
+
+/* 비디오가 세로형일 경우를 위한 추가 스타일 */
+@media (orientation: portrait) {
+    .last-page .page-media video {
+        width: 90vw;
+        height: auto;
+        min-height: 90vh;
+        object-fit: cover;
+        object-position: center center;
+    }
+}
+
+/* 가로형 화면일 경우 */
+@media (orientation: landscape) {
+    .last-page .page-media video {
+        width: auto;
+        height: 100vh;
+        min-width: 100vw;
+        object-fit: cover;
+        object-position: center center;
+    }
+}
+
+.last-page p.page-message {
+    display:flex;
+    position: absolute;
 }
