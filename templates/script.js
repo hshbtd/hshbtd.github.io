@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let countdownInterval;
     let typingTimeout;
     let audioLoaded = false;
+    let effectsEnabled = true; // 초기 화면에서만 효과 활성화
+    let fallingElementInterval;
 
     // ---- Functions ----
 
@@ -97,6 +99,18 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('올바른 비밀번호를 입력해주세요!');
             return;
         }
+
+                // 효과 비활성화
+        effectsEnabled = false;
+
+        // 눈송이 생성 멈추기
+        if (fallingElementInterval) {
+            clearInterval(fallingElementInterval);
+            fallingElementInterval = null;
+        }
+
+        // 기존에 생성된 눈송이 제거
+        document.querySelectorAll('.falling-element').forEach(snowflake => snowflake.remove());
 
         // 부드러운 전환 효과
         COUNTDOWN_SCREEN.classList.add('fade-out');
@@ -266,6 +280,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             videoOverlay.appendChild(birthdayMessage);
+            // 마지막 페이지에서만 눈내리는 효과 추가
+            createVideoSnowEffect(videoOverlay);
+
+    
             document.body.appendChild(videoOverlay);
 
             // 다음 페이지 버튼 숨기기
@@ -393,6 +411,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 배경에 흩날리는 효과 생성
     function createFallingElement() {
+        if (!effectsEnabled) return; // 효과가 비활성화되면 아무것도 하지 않음
+
         const body = document.body;
         const element = document.createElement('div');
         element.classList.add('falling-element');
@@ -406,6 +426,74 @@ document.addEventListener('DOMContentLoaded', () => {
 
         element.addEventListener('animationend', () => {
             element.remove();
+        });
+    }
+
+    // 마지막 비디오 페이지용 눈송이 효과 함수들도 추가
+    function createVideoSnowEffect(container) {
+        // 10개의 눈송이를 한 번에 생성
+        for (let i = 0; i < 10; i++) {
+            setTimeout(() => {
+                createSingleSnowflake(container);
+            }, i * 200);
+        }
+        
+        // 지속적으로 눈송이 생성
+        const snowInterval = setInterval(() => {
+            if (document.getElementById('video-overlay')) {
+                createSingleSnowflake(container);
+            } else {
+                clearInterval(snowInterval);
+            }
+        }, 3000);
+    }
+
+    function createSingleSnowflake(container) {
+        const snowflake = document.createElement('div');
+        snowflake.style.cssText = `
+            position: absolute;
+            background-color: rgba(255, 255, 255, ${Math.random() * 0.6 + 0.4});
+            border-radius: 50%;
+            width: ${Math.random() * 8 + 4}px;
+            height: ${Math.random() * 8 + 4}px;
+            left: ${Math.random() * 100}%;
+            top: -20px;
+            animation: videoSnowFall ${Math.random() * 8 + 6}s linear infinite;
+            pointer-events: none;
+            z-index: 10002;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        `;
+
+        if (!document.getElementById('video-snow-style')) {
+            const style = document.createElement('style');
+            style.id = 'video-snow-style';
+            style.textContent = `
+                @keyframes videoSnowFall {
+                    0% { 
+                        transform: translateY(-20px) rotateZ(0deg); 
+                        opacity: 0; 
+                    }
+                    10% { 
+                        opacity: 1; 
+                    }
+                    90% { 
+                        opacity: 1; 
+                    }
+                    100% { 
+                        transform: translateY(100vh) rotateZ(360deg); 
+                        opacity: 0; 
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        container.appendChild(snowflake);
+
+        snowflake.addEventListener('animationend', () => {
+            if (snowflake.parentNode) {
+                snowflake.remove();
+            }
         });
     }
 
@@ -426,8 +514,8 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCountdown();
     countdownInterval = setInterval(updateCountdown, 1000);
 
-    // 흩날리는 요소 주기적으로 생성
-    setInterval(createFallingElement, 250);
+    // 흩날리는 요소 주기적으로 생성 (인터벌 변수에 할당)
+    fallingElementInterval = setInterval(createFallingElement, 250);
 
     // BGM 볼륨 설정
     BGM.volume = 0.6;
