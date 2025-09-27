@@ -5,6 +5,13 @@
 /* Last Page Video Background */
 /* 마지막 페이지 배경 비디오 스타일 수정 */
 /* 마지막 페이지만 완전히 다르게 처리 */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* ✅ 상하좌우 스크롤 전부 제거 */
+}
 
 .button-52 {
     font-size: 16px;
@@ -55,7 +62,7 @@ body {
     background: linear-gradient(135deg, #fceabb 0%, #f8b500 100%);
     color: #333;
     text-align: center;
-    overflow-x: hidden;
+    overflow: hidden; /* ✅ 가로/세로 스크롤 모두 제거 */
     position: relative;
     -webkit-tap-highlight-color: transparent;
 }
@@ -209,9 +216,9 @@ body {
     animation: fadeInScale 1.5s ease-out forwards;
     position: relative;
     z-index: 10;
-    overflow-y: auto;
+    overflow: hidden;
     max-height: 95vh;
-    -webkit-overflow-scrolling: touch;
+    /* -webkit-overflow-scrolling: touch; */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -527,9 +534,42 @@ audio {
     border-radius: 0;
 }
 
+#fireworks {
+    display: none !important;
+}
+/* 모바일에서 비디오 비율 최적화
+@media (max-width: 768px) {
+    .last-page .page-media video {
+        width: 90%;
+        height: 90%;
+        object-fit: cover;
+        object-position: center center;
+    }
+}
+
+/* 비디오가 세로형일 경우를 위한 추가 스타일 */
+/* @media (orientation: portrait) {
+    .last-page .page-media video {
+        width: 90vw;
+        height: auto;
+        min-height: 90vh;
+        object-fit: cover;
+        object-position: center center;
+    }
+} */
+
+/* 가로형 화면일 경우 */
+/* @media (orientation: landscape) {
+    .last-page .page-media video {
+        width: auto;
+        height: 100vh;
+        min-width: 100vw;
+        object-fit: cover;
+        object-position: center center;
+    }
+} */ */
 
 .last-page p.page-message {
     display:flex;
     position: absolute;
 }
-
