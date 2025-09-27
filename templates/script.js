@@ -125,7 +125,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 특정 페이지를 보여주는 함수
     function showPage(index) {
-        // 기존 페이지 숨기기 (부드러운 전환)
+        // 기존 비디오 오버레이 제거
+        const existingOverlay = document.getElementById('video-overlay');
+        if (existingOverlay) {
+            existingOverlay.remove();
+        }
+
+        // 기존 페이지 숨기기
         mainPages.forEach((page, i) => {
             if (page.classList.contains('active')) {
                 page.classList.add('fade-out');
@@ -145,18 +151,14 @@ document.addEventListener('DOMContentLoaded', () => {
             currentPage.classList.add('active');
             currentPageIndex = index;
 
-            // 필기체 효과 시작 전 기존 타이핑 관련 setTimeout 제거
             if (typingTimeout) {
                 clearTimeout(typingTimeout);
             }
 
-            // 페이지 내용 동적으로 생성 및 필기체 효과 적용
             renderPageContent(currentPage);
 
-            // 마지막 페이지인 경우 다음 페이지 버튼 숨김
-            if (currentPage.classList.contains('last-page')) {
-                NEXT_PAGE_BUTTON.style.display = 'none';
-            } else {
+            // 마지막 페이지가 아닌 경우만 다음 버튼 표시
+            if (!currentPage.classList.contains('last-page')) {
                 NEXT_PAGE_BUTTON.style.display = 'block';
             }
         }, 300);
@@ -170,17 +172,118 @@ document.addEventListener('DOMContentLoaded', () => {
         const mediaType = pageElement.getAttribute('data-media-type');
         const mediaSrc = pageElement.getAttribute('data-media-src');
 
-        // 줄바꿈 문자(엔터키)를 <br> 태그로 변환
+        // 마지막 페이지인 경우 특별 처리
+        if (pageElement.classList.contains('last-page')) {
+            // 컨테이너에서 벗어나서 body에 직접 추가
+            const videoOverlay = document.createElement('div');
+            videoOverlay.id = 'video-overlay';
+            videoOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: #000;
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+
+            const video = document.createElement('video');
+            video.muted = true;
+            video.loop = true;
+            video.playsInline = true;
+            video.autoplay = true;
+            video.preload = 'auto';
+            video.controls = false;
+            video.style.cssText = `
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                object-position: center;
+            `;
+
+            video.addEventListener('loadeddata', () => {
+                console.log('비디오 로드 성공');
+                video.play().catch(error => {
+                    console.warn('비디오 자동 재생 실패:', error);
+                    video.controls = true;
+                });
+            });
+
+            video.addEventListener('error', (e) => {
+                console.warn('비디오 로드 실패:', mediaSrc);
+                video.controls = true;
+            });
+
+            video.src = mediaSrc;
+            videoOverlay.appendChild(video);
+            // 하단에 생일 축하 메시지 추가
+            const birthdayMessage = document.createElement('div');
+            birthdayMessage.style.cssText = `
+                position: absolute;
+                bottom: 50px;
+                left: 50%;
+                transform: translateX(-50%);
+                color: black;
+                font-size: 2em;
+                font-weight: bold;
+                text-align: center;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+                font-family: 'Gaegu', 'Cute Font', 'Noto Sans KR', sans-serif;
+                z-index: 10001;
+                animation: fadeInUp 2s ease-out, pulse 3s infinite;
+                white-space: nowrap;
+            `;
+            birthdayMessage.innerHTML = '🎉 생일 축하해 우리 꼬!! 🎉';
+
+            // 애니메이션 CSS를 동적으로 추가
+            if (!document.getElementById('birthday-animation-style')) {
+                const style = document.createElement('style');
+                style.id = 'birthday-animation-style';
+                style.textContent = `
+                    @keyframes fadeInUp {
+                        from { 
+                            opacity: 0; 
+                            transform: translateX(-50%) translateY(30px); 
+                        }
+                        to { 
+                            opacity: 1; 
+                            transform: translateX(-50%) translateY(0); 
+                        }
+                    }
+                    @keyframes pulse {
+                        0%, 100% { 
+                            transform: translateX(-50%) scale(1); 
+                        }
+                        50% { 
+                            transform: translateX(-50%) scale(1.05); 
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            videoOverlay.appendChild(birthdayMessage);
+            document.body.appendChild(videoOverlay);
+
+            // 다음 페이지 버튼 숨기기
+            NEXT_PAGE_BUTTON.style.display = 'none';
+            
+            return; // 일반 처리 로직 건너뛰기
+        }
+            
+
+        // 일반 페이지 처리 로직 (기존과 동일)
         if (text) {
             text = text.replace(/\n/g, '<br>');
         }
 
-        // 텍스트 영역 생성
         const textWrapper = document.createElement('p');
         textWrapper.classList.add('page-message', 'typed-text');
         pageElement.appendChild(textWrapper);
 
-        // 미디어 영역 생성
         if (mediaSrc) {
             const mediaWrapper = document.createElement('div');
             mediaWrapper.classList.add('page-media');
@@ -192,65 +295,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 mediaWrapper.appendChild(img);
             } else if (mediaType === 'video') {
                 const video = document.createElement('video');
-                video.muted = true; // 자동재생을 위해 음소거
+                video.muted = true;
                 video.loop = true;
-                video.playsInline = true; // 모바일에서 인라인 재생
-                video.preload = 'auto'; // 비디오 미리 로드
-                
-                // 마지막 페이지의 비디오는 자동 재생 및 컨트롤 숨김
-                if (pageElement.classList.contains('last-page')) {
-                    video.autoplay = true;
-                    video.controls = false; // 배경 비디오이므로 컨트롤 숨김
-                    
-                    // 비디오 로드 성공시
-                    video.addEventListener('loadeddata', () => {
-                        console.log('비디오 로드 성공');
-                        video.play().catch(error => {
-                            console.warn('비디오 자동 재생 실패:', error);
-                            video.controls = true;
-                        });
-                    });
-                    
-                    // 비디오 로드 실패시
-                    video.addEventListener('error', (e) => {
-                        console.warn('비디오 로드 실패. 파일 경로를 확인하세요:', mediaSrc);
-                        video.controls = true;
-                        // 비디오 대신 텍스트 표시
-                        const errorMsg = document.createElement('p');
-                        errorMsg.textContent = '비디오를 로드할 수 없습니다.';
-                        errorMsg.style.color = '#666';
-                        errorMsg.style.fontStyle = 'italic';
-                        mediaWrapper.appendChild(errorMsg);
-                    });
-                } else {
-                    video.controls = true;
-                }
-                
-                // src 설정은 이벤트 리스너 등록 후에
+                video.playsInline = true;
+                video.preload = 'auto';
+                video.controls = true;
                 video.src = mediaSrc;
                 mediaWrapper.appendChild(video);
             }
             pageElement.appendChild(mediaWrapper);
         }
 
-        // 필기체 효과 시작 (속도를 느리게 조정)
-        typeWriter(textWrapper, text, 150, () => {
-            // 타이핑이 완료되면 "다음 이야기" 버튼을 활성화 (마지막 페이지가 아닌 경우)
+        // 타이핑 효과 시작
+        typeWriter(textWrapper, text, 120, () => {
             if (!pageElement.classList.contains('last-page')) {
                 NEXT_PAGE_BUTTON.disabled = false;
                 NEXT_PAGE_BUTTON.classList.remove('disabled');
             }
         });
         
-        // 타이핑 중에는 다음 페이지 버튼 비활성화
         if (!pageElement.classList.contains('last-page')) {
             NEXT_PAGE_BUTTON.disabled = true;
             NEXT_PAGE_BUTTON.classList.add('disabled');
         }
     }
 
+
     // 필기체 효과 함수
-    function typeWriter(element, text, delay = 50, callback) {
+    function typeWriter(element, text, delay = 120, callback) {
         let i = 0;
         element.innerHTML = '';
         element.classList.add('typing-active');
@@ -264,13 +336,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     element.innerHTML += text.charAt(i);
                     i++;
                 }
-                typingTimeout = setTimeout(type, delay);
+                // requestAnimationFrame을 사용하여 더 부드러운 애니메이션
+                typingTimeout = setTimeout(() => {
+                    requestAnimationFrame(type);
+                }, delay);
             } else {
                 element.classList.remove('typing-active');
                 if (callback) callback();
             }
         }
-        type();
+        
+        // 초기 실행도 requestAnimationFrame으로 감싸기
+        requestAnimationFrame(type);
     }
 
     // 카운트다운 업데이트 함수
@@ -355,5 +432,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // BGM 볼륨 설정
     BGM.volume = 0.6;
 });
-
-
